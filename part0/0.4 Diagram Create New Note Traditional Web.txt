@@ -1,0 +1,18 @@
+title 0.4 Diagram Create New Note Traditional Web
+
+
+
+actor User
+User->Browser: Write a Text in the Input
+User->Browser: Click the Submit button (Save)
+
+Browser->Server: HTTP POST https://studies.cs.helsinki.fi/exampleapp/new_note
+
+Browser->Server: HTTP GET https://studies.cs.helsinki.fi/exampleapp/notes
+Server-->Browser: HTML-code
+Browser->Server: HTTP GET https://studies.cs.helsinki.fi/exampleapp/main.css
+Server-->Browser: main.css
+Browser->Server: HTTP GET https://studies.cs.helsinki.fi/exampleapp/main.js
+Server-->Browser: main.js
+Browser->Server: HTTP GET https://studies.cs.helsinki.fi/exampleapp/data.json
+Server-->Browser: [ {"content": "tttt1", "date": "2023-10-03T15:13:27.210Z" }, ...]

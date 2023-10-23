@@ -1,0 +1,10 @@
+title 0.6 Diagram Create New Note SPA Web
+
+
+
+actor User
+User->Browser: Write a Text in the Input
+User->Browser: Click the Submit button (Save)
+
+Browser->Server: HTTP POST https://studies.cs.helsinki.fi/exampleapp/new_note_spa
+Server-->Browser: {"message":"note created"}
