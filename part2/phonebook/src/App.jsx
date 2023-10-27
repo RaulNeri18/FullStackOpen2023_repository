@@ -28,7 +28,7 @@ const App = () => {
         handleUpdate(updatedPerson)
       }
     } else {
-      const newPerson = {name: newName, number: newNumber, id: persons.length + 1}
+      const newPerson = {name: newName, number: newNumber}
       handleInsert(newPerson)
     }
   }
