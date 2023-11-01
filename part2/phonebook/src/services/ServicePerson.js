@@ -7,7 +7,6 @@ const getAll = () => {
 }
 
 const insertPerson = (newPerson) => {
-    console.log(newPerson);
     return axios.post(urlBase, newPerson).then(response => response.data)
 }
 
