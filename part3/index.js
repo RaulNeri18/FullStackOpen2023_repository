@@ -5,7 +5,7 @@ const morgan = require('morgan')
 const app = express()
 
 app.use(express.json())
-//app.use(express.static('dist')) //To handle static files 
+app.use(express.static('dist')) //To handle static files 
 app.use(cors())
 
 app.use(morgan(function (tokens, request, response) {
