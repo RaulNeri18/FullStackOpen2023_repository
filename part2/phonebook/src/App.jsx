@@ -11,7 +11,7 @@ const App = () => {
   useEffect(() => {
     ServicePerson.getAll()
         .then(listPersons => setPersons(listPersons))
-        .catch(error => console.log("Error getting person:", error))
+        .catch(error => console.log(`Error getting person: ${error.response.data.error}`))
   }, [])
 
   const [newName, setNewName] = useState('')
@@ -22,9 +22,9 @@ const App = () => {
 
   const submitPerson = (event) => {
     event.preventDefault()
-    console.log('1');
+
     setClassNotification('success')
-    console.log('2');
+    
     const existingPerson = persons.find(person => person.name === newName)
     if(existingPerson) {
       const updateNumber = window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)
@@ -45,7 +45,7 @@ const App = () => {
   }
 
   const handleInsert = (newPerson) => {
-    console.log('3');
+    
     ServicePerson.insertPerson(newPerson)
     .then(personinserted => {
       setPersons(persons.concat(personinserted))
@@ -54,13 +54,20 @@ const App = () => {
       setTimeout(()=> {
         setSuccessMessage(null)
       }, 5000)
-      console.log('4');
-    }).catch(error => console.log("Error inserting person:", error))
+      
+    }).catch(error => {
+      console.log(`Error inserting person: ${error.response.data.error}`)
+      setClassNotification('error')
+      setSuccessMessage(error.response.data.error)
+      setTimeout(()=> {
+        setSuccessMessage(null)
+      }, 5000)
+    })
 
   }
 
   const handleUpdate = (updatedPerson) => {
-    console.log('5');
+    
     ServicePerson.updatePerson(updatedPerson.id, updatedPerson)
     .then(personupdated => {
       setPersons(persons.map(person => person.id !== updatedPerson.id ? person : personupdated))
@@ -69,8 +76,15 @@ const App = () => {
       setTimeout(()=> {
         setSuccessMessage(null)
       }, 5000)
-      console.log('6');
-    }).catch(error => console.log("Error updating person:", error))
+      
+    }).catch(error => {
+      console.log(`Error updating person: ${error.response.data.error}`)
+      setClassNotification('error')
+      setSuccessMessage(error.response.data.error)
+      setTimeout(()=> {
+        setSuccessMessage(null)
+      }, 5000)
+    })
   }
 
   const handleDelete = (id, name) => {
@@ -84,6 +98,7 @@ const App = () => {
         } else 
           console.log("Error deleting person.");
       }).catch(error => {
+        console.log(`Error deleting person: ${error.response.data.error}`)
         setPersons(persons.filter(person => person.id !== id))
         setClassNotification('error')
         setSuccessMessage(`The person '${name}' was already deleted from server`)

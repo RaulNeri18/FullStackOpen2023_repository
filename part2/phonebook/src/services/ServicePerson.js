@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const urlBase = 'http://localhost:3001/persons'
+const urlBase = '/api/persons'
 
 const getAll = () => {
     return axios.get(urlBase).then(response => response.data)
@@ -15,7 +15,6 @@ const updatePerson = (id, newPerson) => {
 }
 
 const deletePerson = (id) => {
-    //return axios.delete(`${urlBase}/${id}`).then(response => response.data)
     return axios.delete(`${urlBase}/${id}`).then(response => response.status)
 }
 
