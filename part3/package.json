@@ -7,8 +7,9 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint .",
     "build:ui": "rm -rf dist && cd ../part2/phonebook && npm run build && cp -r dist ../../part3",
-    "deploy:full": "npm run build:ui && git add . && git commit -m \"Uploading part3 exercises (3.11 - Deployment Frontend and Backend)\" && git push"
+    "deploy:full": "npm run build:ui && git add . && git commit -m \"Uploading part3 exercises (3.12 - 3.22 - Deployment Frontend and Backend (Linter))\" && git push"
   },
   "author": "",
   "license": "ISC",
@@ -20,6 +21,7 @@
     "morgan": "^1.10.0"
   },
   "devDependencies": {
+    "eslint": "^8.53.0",
     "nodemon": "^3.0.1"
   }
 }

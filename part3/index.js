@@ -32,31 +32,30 @@ const unknownEndpoint = (request, response) => {
 
 app.use(express.json())
 app.use(requestLogger)
-app.use(express.static('dist')) //To handle static files 
+app.use(express.static('dist')) //To handle static files
 app.use(cors())
 
 app.use(morgan(function (tokens, request, response) {
-    return [
-      tokens.method(request, response),
-      tokens.url(request, response),
-      tokens.status(request, response),
-      tokens.res(request, response, 'content-length'), '-',
-      tokens['response-time'](request, response), 'ms',
-      JSON.stringify(request.body)
-    ].join(' ')
+  return [
+    tokens.method(request, response),
+    tokens.url(request, response),
+    tokens.status(request, response),
+    tokens.res(request, response, 'content-length'), '-',
+    tokens['response-time'](request, response), 'ms',
+    JSON.stringify(request.body)
+  ].join(' ')
 }))
 
 
 app.get('/', (request, response) => {
-    response.send('<h1>BackEnd Persons</h1>')    
+  response.send('<h1>BackEnd Persons</h1>')
 })
 
 app.get('/info', (request, response, next) => {
   const currentDate = new Date()
   Person.find({}).then(persons => {
     response.send(`<p>Phonebook has info for ${persons.length} people</p><p>${currentDate}</p>`)
-  })
-  .catch(error => next(error))
+  }).catch(error => next(error))
 })
 
 app.get('/api/persons', (request, response) => {
@@ -78,39 +77,38 @@ app.get('/api/persons/:id', (request, response, next) => {
 
 app.delete('/api/persons/:id', (request, response, next) => {
   //console.log('ID', request.params.id)
-  Person.findByIdAndDelete(request.params.id).then(result => {
+  Person.findByIdAndDelete(request.params.id).then(() => {
     response.status(204).end()
-  })
-  .catch(error => next(error))
+  }).catch(error => next(error))
 })
 
 app.post('/api/persons', (request, response, next) => {
   const body = request.body
 
   if (!body.name || !body.number)
-      return response.status(400).json({ 
-          error: 'The name or number is missing' 
+    return response.status(400).json({
+      error: 'The name or number is missing'
+    })
+
+  Person.find({}).then(persons =>
+  {
+    const nameExist = persons.find(person => person.name.toLowerCase() === body.name.toLowerCase())
+    //console.log('FIND PERSON:', nameExist);
+    if(nameExist)
+      return response.status(400).json({
+        error: 'The name already exists in the phonebook'
       })
 
-  Person.find({}).then(persons => 
-    {
-      const nameExist = persons.find(person => person.name.toLowerCase() === body.name.toLowerCase())
-      //console.log('FIND PERSON:', nameExist);
-      if(nameExist)
-        return response.status(400).json({
-            error: 'The name already exists in the phonebook'
-      })
+    const newPerson = new Person({
+      name: body.name,
+      number: body.number
+    })
 
-      const newPerson = new Person({
-        name: body.name, 
-        number: body.number
-      })
-      
-      newPerson.save().then(savedPerson => {
-        response.json(savedPerson)
-      })
+    newPerson.save().then(savedPerson => {
+      response.json(savedPerson)
+    })
       .catch(error => next(error))
-    })  
+  })
 })
 
 app.put('/api/persons/:id', (request, response, next) => {
@@ -120,12 +118,11 @@ app.put('/api/persons/:id', (request, response, next) => {
     name: body.name,
     number: body.number
   }
- 
-  Person.findByIdAndUpdate(request.params.id, person, { new: true, runValidators: true, context: 'query' })
-  .then(updatedPerson => {
+
+  Person.findByIdAndUpdate(request.params.id, person, { new: true, runValidators: true, context: 'query'
+  }).then(updatedPerson => {
     response.json(updatedPerson)
-  })
-  .catch(error => next(error))
+  }).catch(error => next(error))
 })
 
 app.use(unknownEndpoint)
