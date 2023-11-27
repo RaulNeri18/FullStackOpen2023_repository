@@ -1,17 +1,28 @@
 const mongoose = require('mongoose')
 const supertest = require('supertest')
+const jwt = require('jsonwebtoken')
 const app = require('../app')
 
 const api = supertest(app)
+const bcrypt = require('bcrypt')
+const config = require('../utils/config')
+const User = require('../models/user')
 const Blog = require('../models/blog')
 const helper = require('./test_api_helper')
 
 beforeEach(async () => {
+  await User.deleteMany({})
   await Blog.deleteMany({})
 
-  const arrBlogMongoose = helper.initialBlogs.map(blog => new Blog(blog))
+  const passwordHash = await bcrypt.hash('12345678', 10)
+  const user = new User({ username: 'rnerip', name: 'Raul Neri', passwordHash })
+  const userCreated = await user.save()
+
+  const arrBlogMongoose = helper.initialBlogs.map(blog => new Blog({ ...blog, user: userCreated.id }))
   const arrPromiseSaved = arrBlogMongoose.map(blog => blog.save())
-  await Promise.all(arrPromiseSaved)
+  const blogsSaved = await Promise.all(arrPromiseSaved)
+  user.blogs = user.blogs.concat(blogsSaved.map(blog => blog.id))
+  await user.save()
 })
 
 //4.8
@@ -38,8 +49,17 @@ test('successfully creates a new blog post, verify the total number and he conte
     likes: 303
   }
 
+  const allUsers = await helper.getAllUserFromDb()
+  const userForToken = {
+    id: allUsers[0].id,
+    username: allUsers[0].username
+  }
+
+  const token = jwt.sign(userForToken, config.SECRET)
+
   await api
     .post('/api/blogs')
+    .set('Authorization', `Bearer ${token}`)
     .send(newBlog)
     .expect(201)
     .expect('Content-Type', /application\/json/)
@@ -57,8 +77,16 @@ test('the likes property is missing from the request', async () => {
     url: 'url4'
   }
 
+  const allUsers = await helper.getAllUserFromDb()
+  const userForToken = {
+    id: allUsers[0].id,
+    username: allUsers[0].username
+  }
+  const token = jwt.sign(userForToken, config.SECRET)
+
   await api
     .post('/api/blogs')
+    .set('Authorization', `Bearer ${token}`)
     .send(newBlog)
     .expect(201)
     .expect('Content-Type', /application\/json/)
@@ -74,8 +102,16 @@ test('if title or url properties are missing, the backend responds code 400', as
     likes: 505
   }
 
+  const allUsers = await helper.getAllUserFromDb()
+  const userForToken = {
+    id: allUsers[0].id,
+    username: allUsers[0].username
+  }
+  const token = jwt.sign(userForToken, config.SECRET)
+
   await api
     .post('/api/blogs')
+    .set('Authorization', `Bearer ${token}`)
     .send(newBlog)
     .expect(400)
 
@@ -88,8 +124,16 @@ test('for deleting a single blog post', async () => {
   const allBlogs = await helper.getAllBlogFromDb()
   const blogToDelete = allBlogs[0]
 
+  const allUsers = await helper.getAllUserFromDb()
+  const userForToken = {
+    id: allUsers[0].id,
+    username: allUsers[0].username
+  }
+  const token = jwt.sign(userForToken, config.SECRET)
+
   await api
     .delete(`/api/blogs/${blogToDelete.id}`)
+    .set('Authorization', `Bearer ${token}`)
     .expect(204)
 
   const allBlogsAfter = await helper.getAllBlogFromDb()
@@ -108,14 +152,14 @@ test('for updating the information', async () => {
     author: 'author8',
     url: 'url8'
   }
-  console.log('blogToUpdate', blogToUpdate)
+  //console.log('blogToUpdate', blogToUpdate)
   const response = await api
     .put(`/api/blogs/${blogToUpdate.id}`)
     .send(updatedData)
     .expect(200)
     .expect('Content-Type', /application\/json/)
 
-  console.log('response', response.body)
+  //console.log('response', response.body)
 
   expect(response.body.title).toBe(updatedData.title)
   expect(response.body.author).toBe(updatedData.author)
@@ -128,7 +172,7 @@ test('for updating the information', async () => {
 })
 
 //4.14
-test.only('for updating the number of likes for a blog post', async () => {
+test('for updating the number of likes for a blog post', async () => {
   const allBlogs = await helper.getAllBlogFromDb()
   const blogToUpdate = allBlogs[0]
   //console.log('blogToUpdate', blogToUpdate)
@@ -150,6 +194,82 @@ test.only('for updating the number of likes for a blog post', async () => {
   expect(blogsAfter.author).toBe(blogToUpdate.author)
   expect(blogsAfter.url).toBe(blogToUpdate.url)
   expect(blogsAfter.likes).toBe(blogToUpdate.likes + 1)
+})
+
+//4.16
+describe('users creation', () => {
+  test('repeated usernames are not created', async () => {
+    const allUsers = await helper.getAllUserFromDb()
+    const newUser = {
+      username: 'rnerip',
+      name: 'Raul Neri',
+      password: '12345678'
+    }
+
+    await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    const allUsersAtEnd = await helper.getAllUserFromDb()
+    expect(allUsers).toEqual(allUsersAtEnd)
+  })
+
+  test('empty usernames are not created', async () => {
+    const allUsers = await helper.getAllUserFromDb()
+    const newUser = {
+      username: '',
+      name: 'Raul Neri',
+      password: '12345678'
+    }
+
+    await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    const allUsersAtEnd = await helper.getAllUserFromDb()
+    expect(allUsers).toEqual(allUsersAtEnd)
+  })
+
+  test('usernames less than 3 characters are not created', async () => {
+    const allUsers = await helper.getAllUserFromDb()
+    const newUser = {
+      username: 'cn',
+      name: 'Raul Neri',
+      password: '12345678'
+    }
+
+    await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    const allUsersAtEnd = await helper.getAllUserFromDb()
+    expect(allUsers).toEqual(allUsersAtEnd)
+  })
+})
+
+//4.23
+test('error 401 when token is not provided', async () => {
+  const newBlog = {
+    title: 'title3',
+    author: 'author3',
+    url: 'url3',
+    likes: 303
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(401)
+    .expect('Content-Type', /application\/json/)
+
+  const allBlogs = await helper.getAllBlogFromDb()
+  expect(allBlogs).toHaveLength(helper.initialBlogs.length)
 })
 
 afterAll(async () => {
