@@ -12,7 +12,7 @@ loginRouter.post('/', async (request, response) => {
     : null
 
   if (!(user && passwordCorrect))
-    response.status(401).json({ error: 'wrong username or password' })
+    return response.status(401).json({ error: 'wrong username or password' })
 
   //Create Token
   const userForToken = {

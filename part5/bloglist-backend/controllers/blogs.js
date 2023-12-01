@@ -17,23 +17,25 @@ blogsRouter.post('/', middleware.userExtractor, async (request, response) => {
   })
 
   const result = await blog.save()
+  const populatedResult = await Blog.findById(result._id).populate('user', { blogs: 0 })
+
   user.blogs = user.blogs.concat(result._id)
   await user.save()
-  response.status(201).json(result)
+  response.status(201).json(populatedResult)
 
 })
 
 blogsRouter.delete('/:id', middleware.userExtractor, async (request, response) => {
   const user = request.user
   const blog = await Blog.findById(request.params.id)
-  //console.log('user', user)
-  //console.log('blog', blog.user)
+  console.log('user', user)
+  console.log('blog', blog.user)
   if (user.id === blog.user.toString())
   {
     await Blog.deleteOne({ _id: blog.id })
-    //console.log('user.blogs', user.blogs)
+    console.log('user.blogs', user.blogs)
     user.blogs = user.blogs.filter(userBlog => userBlog.toString() !== blog.id.toString())
-    //console.log('user.blogs', user.blogs)
+    console.log('user.blogs', user.blogs)
     await user.save()
   }
 
@@ -53,10 +55,11 @@ blogsRouter.put('/:id', async (request, response) => {
   const newBlog = {
     title: blog.title,
     author: blog.author,
+    likes: blog.likes,
     url: blog.url
   }
 
-  const blogUpdated = await Blog.findByIdAndUpdate(request.params.id, newBlog, { new: true })
+  const blogUpdated = await Blog.findByIdAndUpdate(request.params.id, newBlog, { new: true }).populate('user', { blogs: 0 })
   response.json(blogUpdated)
 })
 
