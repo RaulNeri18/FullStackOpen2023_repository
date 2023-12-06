@@ -89,9 +89,9 @@ const App = () => {
 
   const loginForm = () => (
     <form onSubmit={handleLogin}>
-      <div>Username: <input type='text' value={username} name='Username' onChange={({ target }) => setUsername(target.value)} /></div>
-      <div>Password: <input type='password' value={password} name='Password' onChange={({ target }) => setPassword(target.value)} /></div>
-      <button type='submit'>login</button>
+      <div>Username: <input id='username' type='text' value={username} name='Username' onChange={({ target }) => setUsername(target.value)} /></div>
+      <div>Password: <input id='password' type='password' value={password} name='Password' onChange={({ target }) => setPassword(target.value)} /></div>
+      <button id='login-button' type='submit'>login</button>
     </form>
   )
 
@@ -125,7 +125,7 @@ const App = () => {
       {alertNotification ? (
         <Notification message={alertNotification} className={classNotification}/>) : null}
 
-      <p>{user.name} logged in <input type='button' value='logout' onClick={logout} /></p>
+      <p>{user.name} logged in <button onClick={logout}>logout</button></p>
 
       <Togglable buttonName='create new blog'>
         <BlogForm createBlog={createBlog}/>

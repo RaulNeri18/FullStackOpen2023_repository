@@ -30,15 +30,15 @@ const BlogList = ({ blog, userLogged, updateBlog, removeBlog }) => {
   const showRemoveButton = { display: (blog.user.name.toString() === userLogged.name) ? '' : 'none' }
 
   return (
-    <div style={blogStyle}>
+    <div style={blogStyle} className='blog'>
       <div>
         {blog.title} {blog.author} <button onClick={changeVisibility}>{buttonName}</button>
       </div>
-      <div style={visibilityControl}>
+      <div style={visibilityControl} className="togglableContent">
         <div>{blog.url}</div>
-        <div>likes {blog.likes} <button onClick={handleUpdateBlog}>like</button></div>
+        <div>likes {blog.likes} <button onClick={handleUpdateBlog} className='like'>like</button></div>
         <div>{blog.user.name}</div>
-        <div style={showRemoveButton}>
+        <div style={showRemoveButton} className='removediv'>
           <button onClick={handleRemoveBlog}>remove</button>
         </div>
       </div>
