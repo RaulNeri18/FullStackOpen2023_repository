@@ -1,0 +1,32 @@
+.success {
+  color: green;
+  background: lightgrey;
+  font-size: 20px;
+  border-style: solid;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.error {
+  color: red;
+  background: lightgrey;
+  font-size: 20px;
+  border-style: solid;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.body-container {
+  padding-top: 5px;
+}
+
+.bloglist {
+  margin: 5px 0px;
+}
+
+.bloglist-item:hover {
+  background-color: hwb(150 1% 28% / 0.938);
+  color: rgb(255, 255, 255);
+}
