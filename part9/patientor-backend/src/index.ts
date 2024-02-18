@@ -10,6 +10,10 @@ app.use(cors());
 
 const PORT = 3001;
 
+app.get('/api/ping', (_req, res) => {
+  res.json('ok');
+});
+
 app.use('/api/diagnoses', diagnosisRouter);
 app.use('/api/patients', patientRouter);
 
