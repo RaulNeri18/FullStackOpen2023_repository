@@ -9,18 +9,6 @@ type EntryDetailsProps = {
 };
 
 const EntryDetails = ({ entry, diagnosis }: EntryDetailsProps) => {
-  /*
-    const getEntryType = (entry: Entry) => {
-      switch (entry.type) {
-        case 'Hospital': return entry;
-        case 'HealthCheck': return entry;
-        case 'OccupationalHealthcare': return entry;
-        default:
-          return entry;
-      }
-    };
-  */
-
   const assertNever = (value: never): never => {
     throw new Error(
       `Unhandled discriminated union member: ${JSON.stringify(value)}`

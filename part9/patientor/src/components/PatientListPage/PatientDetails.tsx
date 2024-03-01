@@ -1,8 +1,11 @@
 import { useParams } from "react-router-dom";
-import { Diagnosis, Gender, Patient } from "../../types";
+import { Diagnosis, Entry, Gender, Patient } from "../../types";
 import FemaleIcon from '@mui/icons-material/Female';
 import MaleIcon from '@mui/icons-material/Male';
 import EntryDetails from "./EntryDetails";
+import NewEntry from '../CreateNewEntry/index';
+import { useEffect, useState } from "react";
+import Alert from '@mui/material/Alert';
 
 type PatientDetailsProps = {
   patients : Patient[],
@@ -10,8 +13,16 @@ type PatientDetailsProps = {
 };
 
 const PatientDetails = ({ patients, diagnosis} : PatientDetailsProps) => {
-  const id = useParams().id;
+  const [entries, setEntries] = useState<Entry[]>([]);
+  const [errorMessage, setErrorMessage] = useState('');
+  const id = useParams().id as string;
   const patient = patients.find(n => n.id === id);
+
+  useEffect(() => {
+    if (patient) {
+      setEntries(patient.entries);
+    }
+  }, [patient]);
 
   if (!patient) return null;
 
@@ -25,8 +36,12 @@ const PatientDetails = ({ patients, diagnosis} : PatientDetailsProps) => {
       <div>ssh: {patient?.ssn}</div>
       <div>occupation: {patient?.occupation}</div>
 
+      {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
+
+      <NewEntry patientId={id} entries={entries} setEntries={setEntries} setErrorMessage={setErrorMessage}></NewEntry>
+
       <h3>entries</h3>
-      <div>{patient.entries.map(entry => 
+      <div>{entries.map(entry => 
           <EntryDetails key={entry.id} entry={entry} diagnosis={diagnosis} />
         )}
       </div>
